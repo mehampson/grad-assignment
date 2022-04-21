@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    if flash.length > 0
+        .alert.alert-info
+            span #{flash}
+    h4 Select a plant
+    .list-group.mb-2
+        each plant in plants
+            a.list-group-item.list-group-item-action(href="/plant/" + plant.id)= plant.description
+        else
+            li.list-group-item No such plants found
+    a(href="/plant/create") Add a plant

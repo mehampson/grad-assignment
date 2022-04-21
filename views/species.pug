@@ -1,0 +1,25 @@
+extends layout
+
+block content
+    .row
+        form#update(method="POST", action="/species/" + species.id)
+            .form-group.row.mb-2
+                label.form-label.col-sm-3(for="species") Species:
+                input#species.form-control.col(type="input", name="species", value=species.species, required)
+            .form-group.row.mb-2
+                label.form-label.col-sm-3(for="common_name") Common Name:
+                input#common_name.form-control.col(type="input", name="common_name", value=species.common_name, required)
+            .form-group.row.mb-2
+                label.form-label.col-sm-3(for="water_frequency") Watering Frequency:
+                input#water_frequency.form-control.col(type="number", name="water_frequency", min="1", value=species.water_frequency, required)
+            .row
+                .form-check
+                    label.form-label(for="toxic") Toxic
+                    input#toxic.form-check-input(type="checkbox", name="toxic", checked=species.toxic)
+        .row
+            .col
+                p Created: #{species.createdAt.toLocaleString()}
+                p Updated: #{species.updatedAt.toLocaleString()}
+        .row
+            .col
+                button.btn.btn-primary(type="submit", form='update') Update
