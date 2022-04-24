@@ -16,9 +16,10 @@ Mongoose to write a model instance back to the database, so you can trust that
 your data will be fit for the uses it's intended for.
 
 Let's say you're tracking students and want to record their first, middle, and
-last names. Middle names are usually optional, but you might want to insist that
-every student has the other fields recorded. Using the ```required```
-validator tells Mongoose to enforce these rules:
+last names. What are your requirements? Middle names are nice to have but it's not
+safe to assume everyone has one; and it's fair to say you can't easily do without
+your students' first and last names. Using the ```required``` validator tells
+Mongoose to enforce these rules:
 
 ~~~
 const studentSchema = mongoose.Schema({
@@ -38,10 +39,8 @@ const studentSchema = mongoose.Schema({
 ~~~
 
 Now, if you try to create or update an instance of studentSchema without a value in
-first_name, Mongoose will raise a ```ValidatorError``` instead of sending that
-instance to Mongo. (And if you want to get fancy, ```required``` can use any
-expression that evaluates to a boolean, so you can even make fields conditionally
-required based on other criteria.)
+first_name and last_name, Mongoose will raise a ```ValidatorError``` instead of
+sending that instance to Mongo.
 
 Mongoose provides more fine-grained validators as well:
 * Number and Date fields can define ```min``` and ```max``` values.
@@ -122,6 +121,9 @@ const studentSchema = mongoose.Schema({
 }
 ~~~
 
+Along these same lines, ```required``` can use any expression that evaluates to
+a boolean, so you can even make fields conditionally required based on other criteria.
+
 ### Using Validators Elsewhere
 
 The validators you define on your schema can be helpful in other places as well.
@@ -152,8 +154,8 @@ Student.schema.path('program').options.enum;
 // returns ['Computer Science', 'Programming', 'Database Management']
 ~~~
 
-(Of course if you're defining your validators separately as described above,
-it's probably more ergonomic to just reference those instead.)
+(If you're defining your validators separately as described above,
+it's probably more ergonomic to just reference those instead, of course.)
 
 Once you know where the validator can be found, you can reference it directly in
 the route and pass it to the render context. Your res.render call could look
@@ -170,11 +172,12 @@ And then in your template, you could dynamically construct a select widget with
 those values:
 
 ~~~
-form#update(method="POST", action="/student/" + student.id)
+form(method="POST", action="/student/" + student.id)
     .form-group
         label(for="program") Program:
-        select(type="select", name="program", required)
+        select(type="select", name="program")
             each p in programs
+                // - If the student already has this program value, pre-select it
                 if p == student.program
                     option(value=p, selected='true') #{p}
                 else
