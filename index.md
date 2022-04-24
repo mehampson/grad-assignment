@@ -6,12 +6,14 @@ As a schemaless database, MongoDB is perfectly happy to accept a document in
 basically any condition, as long as it's valid BSON. This has its upsides, but
 at the end of the day your application will need to be a bit pickier if it's
 going to meet your needs -- what's the use of accepting a mailing address record
-that has no street, city, or state, for example?
+that has no street, city, or state, for example? Or an email address of "do not
+email me"?
 
 Mongoose will help you enforce consistency and usability across your documents by
-defining field validation. These are simply conditions that must be met for
+defining [field validation](https://mongoosejs.com/docs/validation.html)
+on your schema. These are simply conditions that must be met for
 Mongoose to write a model instance back to the database, so you can trust that
-your data will be fit for the uses its intended for.
+your data will be fit for the uses it's intended for.
 
 Let's say you're tracking students and want to record their first, middle, and
 last names. Middle names are usually optional, but you might want to insist that
@@ -42,17 +44,16 @@ expression that evaluates to a boolean, so you can even make fields conditionall
 required based on other criteria.)
 
 Mongoose provides more fine-grained validators as well:
-* Number fields can define upper and/or lower bounds with ```min``` and ```max```.
+* Number and Date fields can define ```min``` and ```max``` values.
 * String fields can define length requirements with ```minLength``` and ```maxLength```.
 * Strings also have a powerful ```match``` validator, which lets you use a regular
 expression to define a required pattern.
-* And strings can also use ```enum``` to define an array of values, which the field
-must be one of.
+* And Strings and Numbers can both use ```enum``` to define an array of acceptable values.
 
 So let's say you want to track your students' current academic program. A validator
 is a good idea here: your school probably doesn't offer free-text degrees. Using
 an ```enum``` validator probably makes more sense than a ```match``` unless you're
-*really* into with regular expressions.
+*really* into regular expressions.
 
 ~~~
 const studentSchema = mongoose.Schema({
@@ -77,8 +78,9 @@ const studentSchema = mongoose.Schema({
 ~~~
 
 (In the real world, you would probably want to model this academic program field as
-a subdocument on the student, which would give you much more granular detail and
-allow for more than a single program at a time.)
+a [subdocument](https://mongoosejs.com/docs/subdocs.html) on the student,
+which would give you much more granular detail and allow for more than a single
+program at a time. But subdocuments need validation too.)
 
 You don't have to define the ```enum``` array inline, either -- you can construct it
 somewhere more convenient and then just reference it on the field. For example,
@@ -96,7 +98,7 @@ const validators = {
         ...,
         'Etc.'
     ],
-    // add more validators here for convenience
+    // add more validators here for your convenience
 }
 
 module.exports = validators;
@@ -147,6 +149,9 @@ Student.schema.path('program').options.enum;
 // returns ['Computer Science', 'Programming', 'Database Management']
 ~~~
 
+(And of course if you're defining your validators separately as described above,
+it's probably more ergonomic to just reference those instead.)
+
 Once you know where the validator can be found, you can reference it directly in
 the route and pass it to the render context. Your res.render call could look
 something like this:
@@ -180,7 +185,7 @@ other approaches to consider as well. These methods are not mutually exclusive,
 and the more complex your data requirements, the more likely you are to need
 several layers of validation.
 
-The first is to put your validation in HTML forms on the client side. Client-side
+The first is to put your validation logic in HTML forms on the client side. Client-side
 validation is important: it provides users with direct feedback on how to use your
 application, and it does keep your server from having to handle those invalid requests.
 But it's risky to leave all your validation on the client, as it's not terribly
@@ -189,8 +194,9 @@ repeat yourself in cases when multiple forms can touch the same collection. And
 of course, you can't rely on it at all if you're providing end-users with an API.
 
 The second approach is to define your validation in MongoDB itself. MongoDB does
-offer similar functionality by letting you define a JSON schema for a collection
-if you choose. This might be a better place to put your validation than Mongoose
+offer similar functionality by letting you define [validation rules](https://www.mongodb.com/docs/manual/core/schema-validation/)
+for a collection if you choose.
+This might be a better place to put your validation logic than Mongoose
 in cases where your app is just one of several sources pushing data into the DB,
 especially if you don't have control over all the others. (Though if you have control
 over the DB but not all the apps that have write permissions on it, you're probably
