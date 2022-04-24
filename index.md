@@ -60,6 +60,10 @@ const studentSchema = mongoose.Schema({
 }
 ~~~
 
+(In the real world, you would probably want to model this academic program field as
+a subdocument on the student, which would give you much more granular detail and
+allow for more than a single program at a time.)
+
 You don't have to define the ```enum``` array inline, either -- you can construct it
 somewhere more convenient and then just reference it on the field. For example,
 you probably have more than three academic programs to choose from, so you could
@@ -99,32 +103,11 @@ const studentSchema = mongoose.Schema({
 }
 ~~~
 
-### What Are The Alternatives?
-
-Mongoose is not the only way to handle data validation, and there are a few other
-approaches to consider as well.
-
-The first is to put your validation in HTML forms on the client side. Client-side
-validation is important: it provides users with direct feedback on how to use your
-application, and it does mean your server won't have to handle those invalid requests.
-But it's risky to leave all your validation on the client, as it's not terribly
-hard to get around. It's also inefficient, because you'll have to repeat yourself in
-cases when multiple forms can touch the same collection. And of course, users
-would bypass it entirely if you're providing an API.
-
-The second approach is to define your validation in MongoDB itself. MongoDB does
-offer similar functionality by letting you define a JSON schema for a collection
-if you choose. This might be a better place to put your validation than Mongoose
-in cases where your app is just one of several data sources for your DB, especially
-if you don't have control over all the other sources. (Though if you have control
-over the DB but not all the apps that have write permissions on it, you may be
-better off offering an Express API instead of direct MongoDB access.)
-
 ### Using Validators Elsewhere
 
 The validators you define on your schema can be helpful in other places as well.
-You can find a field's validators on the ~~~options~~~ attribute of its SchemaType
-object, which itself can be accessed with the ~~~schema.path()~~~ function:
+You can find a field's validators on the ```options``` attribute of its SchemaType
+object, which itself can be accessed with the ```schema.path()``` function:
 
 ~~~
 const studentSchema = mongoose.Schema({
@@ -176,3 +159,35 @@ form#update(method="POST", action="/student/" + student.id)
                 else
                     option #{p}
 ~~~
+
+### What Are The Alternatives?
+
+Mongoose is not the only strategy to handle data validation, and there are a few
+other approaches to consider as well. These methods are not mutually exclusive,
+and the more complex your data requirements, the more likely you are to need
+several layers of validation.
+
+The first is to put your validation in HTML forms on the client side. Client-side
+validation is important: it provides users with direct feedback on how to use your
+application, and it does keep your server from having to handle those invalid requests.
+But it's risky to leave all your validation on the client, as it's not terribly
+hard for a bad actor to get around. It's also inefficient, because you'll have to
+repeat yourself in cases when multiple forms can touch the same collection. And
+of course, you can't rely on it at all if you're providing end-users with an API.
+
+The second approach is to define your validation in MongoDB itself. MongoDB does
+offer similar functionality by letting you define a JSON schema for a collection
+if you choose. This might be a better place to put your validation than Mongoose
+in cases where your app is just one of several sources pushing data into the DB,
+especially if you don't have control over all the others. (Though if you have control
+over the DB but not all the apps that have write permissions on it, you're probably
+better off offering an API built in Express instead of direct MongoDB access if you can.)
+
+Another advantage of using MongoDB schema validation is that it will facilitate
+data integrity checks: Atlas will identify stored documents that fail validation
+automatically, for example. You can do this in Mongoose too, by instantiating
+models from the DB and running their validators manually, but it takes a bit more
+work to set up. So if you find that your project has substantial data management
+requirements that are not really in scope for a web app (e.g. decades worth of
+historical student records that have already migrated from system to system),
+consider looking into MongoDB's native validation as well.
