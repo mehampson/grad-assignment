@@ -50,6 +50,9 @@ Mongoose provides more fine-grained validators as well:
 expression to define a required pattern.
 * And Strings and Numbers can both use ```enum``` to define an array of acceptable values.
 
+(Note that not all of those appear in Mongoose's Validation documentation, but
+they are all described under [SchemaTypes](https://mongoosejs.com/docs/schematypes.html).)
+
 So let's say you want to track your students' current academic program. A validator
 is a good idea here: your school probably doesn't offer free-text degrees. Using
 an ```enum``` validator probably makes more sense than a ```match``` unless you're
@@ -122,7 +125,7 @@ const studentSchema = mongoose.Schema({
 ### Using Validators Elsewhere
 
 The validators you define on your schema can be helpful in other places as well.
-You can find a field's validators on the ```options``` attribute of its SchemaType
+You can find a field's validators on the ```options``` property of its SchemaType
 object, which itself can be accessed with the ```schema.path()``` function:
 
 ~~~
@@ -149,7 +152,7 @@ Student.schema.path('program').options.enum;
 // returns ['Computer Science', 'Programming', 'Database Management']
 ~~~
 
-(And of course if you're defining your validators separately as described above,
+(Of course if you're defining your validators separately as described above,
 it's probably more ergonomic to just reference those instead.)
 
 Once you know where the validator can be found, you can reference it directly in
@@ -195,16 +198,15 @@ of course, you can't rely on it at all if you're providing end-users with an API
 
 The second approach is to define your validation in MongoDB itself. MongoDB does
 offer similar functionality by letting you define [validation rules](https://www.mongodb.com/docs/manual/core/schema-validation/)
-for a collection if you choose.
-This might be a better place to put your validation logic than Mongoose
-in cases where your app is just one of several sources pushing data into the DB,
+for a collection if you choose. This might be a better place to put your validation
+logic than Mongoose if your app is just one of several sources pushing data into the DB,
 especially if you don't have control over all the others. (Though if you have control
 over the DB but not all the apps that have write permissions on it, you're probably
 better off offering an API built in Express instead of direct MongoDB access if you can.)
 
 Another advantage of using MongoDB schema validation is that it will facilitate
-data integrity checks: Atlas will identify stored documents that fail validation
-automatically, for example. You can do this in Mongoose too, by instantiating
+data integrity checks: Atlas automatically tells you which documents meet or fail
+validation, for example. You can do this in Mongoose too, by instantiating
 models from the DB and running their validators manually, but it takes a bit more
 work to set up. So if you find that your project has substantial data management
 requirements that are not really in scope for a web app (e.g. decades worth of
