@@ -2,8 +2,6 @@ CSCI E-31 Grad Assignment
 
 # Data Validation With Mongoose
 
-## Validators
-
 As a schemaless database, MongoDB is perfectly happy to accept a document in
 basically any condition, as long as it's valid BSON. This has its upsides, but
 at the end of the day your application will need to be a bit pickier if it's
@@ -22,9 +20,18 @@ validator tells Mongoose to enforce these rules:
 
 ~~~
 const studentSchema = mongoose.Schema({
-    first_name: {type: String, required: true},
-    middle_name: {type: String, required: false},
-    last_name: {type: String, required: true},
+    first_name: {
+        type: String,
+        required: true
+    },
+    middle_name: {
+        type: String,
+        required: false
+    },
+    last_name: {
+        type: String,
+        required: true
+    },
 }
 ~~~
 
@@ -49,11 +56,20 @@ an ```enum``` validator probably makes more sense than a ```match``` unless you'
 
 ~~~
 const studentSchema = mongoose.Schema({
-    first_name: {type: String, required: true},
-    middle_name: {type: String, required: false},
-    last_name: {type: String, required: true},
+    first_name: {
+        type: String,
+        required: true
+    },
+    middle_name: {
+        type: String,
+        required: false
+    },
+    last_name: {
+        type: String,
+        required: true
+    },
     program: {
-        type:String,
+        type: String,
         required: true,
         enum: ['Computer Science', 'Programming', 'Database Management']
     }
@@ -92,11 +108,9 @@ module.exports = validators;
 const validators = require('./validation');
 
 const studentSchema = mongoose.Schema({
-    first_name: {type: String, required: true},
-    middle_name: {type: String, required: false},
-    last_name: {type: String, required: true},
+    ...,
     program: {
-        type:String,
+        type: String,
         required: true,
         enum: validators['program']
     }
@@ -111,15 +125,14 @@ object, which itself can be accessed with the ```schema.path()``` function:
 
 ~~~
 const studentSchema = mongoose.Schema({
-    first_name: {type: String, required: true},
-    middle_name: {type: String, required: false},
+    ...,
     last_name: {
         type: String,
         minLength: 3,
         required: true
     },
     program: {
-        type:String,
+        type: String,
         required: true,
         enum: ['Computer Science', 'Programming', 'Database Management']
     }
